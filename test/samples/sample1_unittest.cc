@@ -135,6 +135,7 @@ TEST_F(ConvolutionTest, Simple1) {
     }
 }
 
+/*
 TEST_F(ConvolutionTest, Simple2) {
     double h[] = {0,2,2,2};
     int hSize  = 4;
@@ -221,11 +222,13 @@ TEST_F(ConvolutionTest, Simple4) {
       EXPECT_NEAR(exp[i], outputStream.at(i), .00000000001);
     }
 }
+*/
 
 double rand_float( double low, double high ) {
   return ( ( double )rand() * ( high - low ) ) / ( double )RAND_MAX + low;
 }
 
+/*
 TEST_F(ConvolutionTest, Random128) {
   srand(1234);
 
@@ -259,6 +262,7 @@ TEST_F(ConvolutionTest, Random128) {
     EXPECT_NEAR(exp[i], outputStream.at(i), .00000000001);
   }
 }
+*/
 
 TEST_F(ConvolutionTest, Random1024) {
   srand(1234);
@@ -273,7 +277,7 @@ TEST_F(ConvolutionTest, Random1024) {
   for (int i = 0; i < inputSize / 2; i++)
     input[i] = rand_float(0, 1);
 
-  int framesToOutput = 32;
+  int framesToOutput = 256;
   double *output = new double[framesToOutput];
 
   UniformConvolver uc(h, hSize, framesToOutput);

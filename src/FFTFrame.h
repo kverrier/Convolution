@@ -2,16 +2,18 @@
 #define FFTFrame_h
 
 #include "ReverbAccumulationBuffer.h"
+#include <fftw3.h>
 
 class FFTFrame {
   public:
-    FFTFrame(double *impulseResponse, int size, int readIndex);
     FFTFrame(double* impulseResponseChunk, int framesToProcess, ReverbAccumulationBuffer* accumulationBuffer, int index);
+    ~FFTFrame();
     int getReadIndex();
     void process(double* input);
     void print();
 
   private:
+    void convolve(double* a, double* b, double *output, int n);
     double* m_impulseResponse;
     double* m_processBuffer;
     double* m_overflowBuffer;
@@ -20,5 +22,11 @@ class FFTFrame {
     int m_size;
     int m_readIndex;
     ReverbAccumulationBuffer* m_accumulationBuffer;
+    // stuff for FFTW
+    fftw_complex* m_aHat;
+    fftw_complex* m_bHat;
+    fftw_complex* m_abHat;
+
+    fftw_plan m_pa;
 };
 #endif

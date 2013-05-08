@@ -28,7 +28,7 @@ SRC_DIR = ../src
 CPPFLAGS += -I$(GTEST_DIR)/include -I$(GMOCK_DIR)/include
 
 # Flags passed to the C++ compiler.
-CXXFLAGS += -g -Wall -Wextra
+CXXFLAGS += -g -Wall -Wextra -O0 -fopenmp
 
 LDFLAGS=-lm -lfftw3 -lstdc++
 
@@ -104,7 +104,7 @@ OBJ_FILES := $(addprefix ../obj/,$(notdir $(CPP_FILES:.cpp=.o)))
 	   #g++ $(LD_FLAGS) -o $@ $^
 
 ../obj/%.o: ../src/%.cpp
-	   g++ $(CC_FLAGS) -c -o $@ $<
+	   $(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
 
 sample1_unittest.o : $(USER_DIR)/sample1_unittest.cc $(GMOCK_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(USER_DIR)/sample1_unittest.cc

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "./UniformConvolver.h"
 #include "./ReverbAccumulationBuffer.h"
+#include <omp.h>
 
 UniformConvolver::UniformConvolver(double* impulseResponse, int impulseSize , int outputSize)
 : m_accumulationBuffer(3*impulseSize, outputSize)
@@ -18,9 +19,19 @@ UniformConvolver::UniformConvolver(double* impulseResponse, int impulseSize , in
 }
 
 void UniformConvolver::process(double *input, double *output) {
+
+  omp_set_num_threads(1);
+
+  #pragma omp parallel for
+  for(int i = 0; i < m_fftFrames.size(); i++) {
+    m_fftFrames[i].process(input);
+  }
+
+  /*
   for(std::vector<int>::size_type i = 0; i != m_fftFrames.size(); i++) {
     m_fftFrames[i].process(input);
   }
+  */
   m_accumulationBuffer.loadOutput(output);
 }
 
