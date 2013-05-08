@@ -8,11 +8,11 @@ FFTFrame::FFTFrame(double* impulseResponseChunk, int framesToProcess, ReverbAccu
   m_framesToProcess = framesToProcess;
   m_size = 2 * framesToProcess; // Size needed for the convolution
   m_readIndex = index;
-  m_impulseResponse = new double[m_size];
+  m_impulseResponse = new double[m_size]();
   memcpy(m_impulseResponse, impulseResponseChunk + m_readIndex, sizeof(double)*framesToProcess);
-  m_processBuffer   = new double[m_size];
-  m_overflowBuffer  = new double[m_size];
-  m_resultBuffer    = new double[m_size];
+  m_processBuffer   = new double[m_size]();
+  m_overflowBuffer  = new double[m_size]();
+  m_resultBuffer    = new double[m_size]();
   m_accumulationBuffer = accumulationBuffer;
 }
 
