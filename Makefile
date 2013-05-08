@@ -1,25 +1,29 @@
 CC=g++
 CFLAGS=-c -Wall -Wextra
-LDFLAGS=-lm -lfftw3 #-lstdc++
-SRCS=main.cpp
+LDFLAGS=-lm -lfftw3 -lstdc++
+SRCS= src/main.cpp \
+			src/FFTFrame.cpp \
+			src/conv.cpp \
+			src/ReverbAccumulationBuffer.cpp \
+			src/UniformConvolver.cpp
+OBJS= $(SRCS:.cpp=.o)
+TARGET=convolution
 
+.PHONY: clean lint
 
-all: audio
+all: $(SRCS) $(TARGET)
 
-run: audio
-	./audio
+run: $(TARGET)
+	./$(TARGET)
 
-audio: conv.o main.o
-	$(CC) conv.o main.o -o audio $(LDFLAGS)
-
-main.o: main.cpp
-	$(CC) $(CFLAGS) main.cpp
-
-conv.o: conv.cpp
-	$(CC) $(CFLAGS) conv.cpp
+$(TARGET): $(OBJS)
+	$(CC) -o $@ $^ $(LDFLAGS)
+		
+.cpp.o:
+	$(CC) $(CFLAGS) $< -o $@
 	
 clean:
-	rm -rf *o audio
+	rm -rf *o $(TARGET)
 
 lint : cpplint.py $(SRCS)
 	python cpplint.py $(SRCS)
@@ -27,3 +31,4 @@ lint : cpplint.py $(SRCS)
 cpplint.py:
 	wget http://google-styleguide.googlecode.com/svn/trunk/cpplint/cpplint.py
 	chmod +x cpplint.py
+

@@ -1,0 +1,166 @@
+/* Copyright (c) 2013 Kyle Verrier */
+
+#include <iostream>
+#include <fstream>
+#include <stdlib.h>
+#include <sstream>
+#include <string>
+#include <math.h>
+#include <vector>
+#include "./FFTFrame.h"
+#include "./ReverbAccumulationBuffer.h"
+#include "./UniformConvolver.h"
+
+bool doublesEqual(double a, double b) {
+    return fabs(a - b) < .00000000001;
+}
+
+void printTestOutput(double* expected, std::vector<double> actual) {
+    if ( std::equal(actual.begin(), actual.end(), expected, doublesEqual) ) {
+        std::cout << "PASSED\n";
+    } else {
+        std::cout << "!!! FAIL !!!. Expected:\t[";
+        for( int i = 0; i < actual.size(); i++ )
+            std::cout << std::fixed << expected[i] << ", ";
+        std::cout << "]\n\t\tActual:\t[";
+        for( size_t i = 0; i < actual.size(); i++ )
+            std::cout << std::fixed << actual[i] << ", ";
+        std::cout << "]\n";
+    }
+
+}
+
+void test1() {
+    double h[] = {0,2,2,2,1,3,0,2};
+    int framesToOutput = 4;
+    double output[4] = {0};
+    int framesToProcess = 4;
+    int accSize = 12;
+
+    ReverbAccumulationBuffer accumulator(accSize, framesToOutput);
+    FFTFrame h1_frame = FFTFrame(h, framesToProcess, &accumulator, 0);
+    FFTFrame h2_frame = FFTFrame(h, framesToProcess, &accumulator, 4);
+
+    double inputStream[] = {1,2,1,1,
+                            0,1,1,1,
+                            0,0,0,0,
+                            0,0,0,0 };
+
+    int inputLength = 16;
+
+    std::vector<double> outputStream;
+    for (int i = 0; i < inputLength / framesToProcess; i++) {
+        h1_frame.process(inputStream+(i*framesToProcess));
+        h2_frame.process(inputStream+(i*framesToProcess));
+        accumulator.loadOutput(output);
+
+        for (int i = 0; i < framesToOutput; i++) {
+            outputStream.push_back(output[i]);
+        }
+    }
+
+    double expected[] = {0, 2, 6, 8, 9, 9, 11, 10, 13, 7, 8, 4, 5, 2, 2, 0};
+
+    printTestOutput(expected, outputStream);
+
+}
+
+
+void test3() {
+    double h[] = {0,2,2,2,1,3,0,2};
+    int hSize = 8;
+    int framesToOutput = 8;
+    double *output = new double[framesToOutput];
+
+    double inputStream[] = {1,2,1,1, 0,1,1,1, 0,0,0,0, 0,0,0,0 };
+    int inputLength = 16;
+
+    UniformConvolver uc(h, hSize, framesToOutput);
+
+    std::vector<double> outputStream;
+    for (int i = 0; i < inputLength / framesToOutput; i++) {
+        uc.process(inputStream+(i*framesToOutput), output);
+        for (int i = 0; i < framesToOutput; i++)
+            outputStream.push_back(output[i]);
+    }
+
+    double expected[] = {0, 2, 6, 8, 9, 9, 11, 10, 13, 7, 8, 4, 5, 2, 2, 0};
+    printTestOutput(expected, outputStream);
+}
+
+void test4() {
+    double h[] = { 4, 10, 6, 0, 2, 8, 6, 1, 1, 5, 0, 5, 0, 2, 7, 3};
+    int hSize = 16;
+    double inputStream[] = { 10, 0, 10, 7, 8, 0, 3, 6, 2, 0, 10, 5, 6, 6, 6, 5,
+                              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    int inputLength = 32;
+
+    int framesToOutput = 8;
+    double *output = new double[framesToOutput];
+
+    UniformConvolver uc(h, hSize, framesToOutput);
+
+    std::vector<double> outputStream;
+    for (int i = 0; i < inputLength / framesToOutput; i++) {
+        uc.process(inputStream+(i*framesToOutput), output);
+        for (int i = 0; i < framesToOutput; i++)
+            outputStream.push_back(output[i]);
+    }
+
+       40   100   100   128   182   202   140   158   
+      228   222   123   271   247   279   266   319   
+      314   250   218   195   146   177    98    91   
+      135   107    94    72    70    53    15
+
+    double expected[] = { 40, 100, 100, 128, 182, 202, 140, 158,
+                          228, 222, 123, 271, 247, 279, 266, 319,
+                          422, 336, 420, 349, 375, 396, 353, 402,
+                          314, 250, 218, 195, 146, 177,  98,  91,
+                          135, 107,  94,  72,  70,  53,  15 };
+       /*
+    double expected[] = { 40, 100, 100, 128, 182, 202, 140, 158,
+                  228, 222, 123, 271, 247, 279, 266, 319,
+                  422, 336, 420, 349, 375, 396, 353, 402,
+                  498, 514, 580, 469, 637, 565, 549, 596,
+                  547, 560, 443, 445, 459, 347, 457, 341,
+                  393, 375, 304, 323, 265, 255, 175, 194,
+                  226, 156, 153, 153, 156, 144,  88, 142,
+                   95,  60,  40,  37,  30,  12,   9 };
+                   */
+
+    printTestOutput(expected, outputStream);
+}
+
+
+void test2() {
+    double h[] = {0,2,2,2};
+    int hSize  = 4;
+    int framesToOutput = 2;
+    double output[2] = {0};
+    int framesToProcess = 2;
+
+    UniformConvolver uniConv(h, hSize, framesToOutput);
+
+    double inputStream[] = {1,2,1,1, 0,0,0,0, 0,0,0,0, 0,0,0,0 };
+    int inputLength = 8;
+
+    std::vector<double> outputStream;
+    for (int i = 0; i < inputLength / framesToProcess; i++) {
+        uniConv.process(inputStream+(i*framesToProcess), output);
+
+        for (int i = 0; i < framesToOutput; i++) {
+            outputStream.push_back(output[i]);
+        }
+    }
+
+    double expected[] = {0, 2, 6, 8, 8, 4, 2, 0};
+    printTestOutput(expected, outputStream);
+
+}
+
+int main() {
+
+    test4();
+
+    return 0;
+}
