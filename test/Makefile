@@ -27,8 +27,8 @@ SRC_DIR = ../src
 # Flags passed to the preprocessor.
 CPPFLAGS += -I$(GTEST_DIR)/include -I$(GMOCK_DIR)/include
 
-# Flags passed to the C++ compiler.
-CXXFLAGS += -g -Wall -Wextra -O0 -fopenmp
+
+CXXFLAGS += -g -Wall -Wextra -std=c++0x -O0 -fopenmp
 
 LDFLAGS=-lm -lfftw3 -lstdc++
 

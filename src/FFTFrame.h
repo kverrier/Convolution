@@ -13,7 +13,7 @@ class FFTFrame {
     void print();
 
   private:
-    void convolve(double* a, double* b, double *output, int n);
+    void performConvolution();
     double* m_impulseResponse;
     double* m_processBuffer;
     double* m_overflowBuffer;
@@ -22,11 +22,12 @@ class FFTFrame {
     int m_size;
     int m_readIndex;
     ReverbAccumulationBuffer* m_accumulationBuffer;
+
     // stuff for FFTW
     fftw_complex* m_aHat;
     fftw_complex* m_bHat;
     fftw_complex* m_abHat;
-
     fftw_plan m_pa;
+    fftw_plan m_ipab;
 };
 #endif

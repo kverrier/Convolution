@@ -7,7 +7,8 @@
 #include <string>
 #include <math.h>
 #include <vector>
-#include "./UniformConvolver.h"
+#include "../src/UniformConvolver.h"
+#include "CycleTimer.h"
 
 bool doublesEqual(double a, double b) {
     return fabs(a - b) < .00000000001;
@@ -116,12 +117,51 @@ void test2() {
 
 }
 
+double rand_float( double low, double high ) {
+  return ( ( double )rand() * ( high - low ) ) / ( double )RAND_MAX + low;
+}
+
+void test5() {
+  srand(1234);
+
+  int hSize = 4096;
+  double *h = new double[hSize];
+  for (int i = 0; i < hSize; i++)
+    h[i] = rand_float(0, 1);
+
+  int inputSize = hSize * 100;
+  double *input = new double[inputSize];
+  for (int i = 0; i < inputSize / 2; i++)
+    input[i] = rand_float(0, 1);
+
+  int framesToOutput = 32;
+  double *output = new double[framesToOutput];
+
+  UniformConvolver uc(h, hSize, framesToOutput);
+
+  double total = 0.0;
+  for (int i = 0; i < inputSize / framesToOutput; i++) {
+    double startTime = CycleTimer::currentSeconds();
+    uc.process(input+(i*framesToOutput), output);
+    double endTime = CycleTimer::currentSeconds();
+    total += endTime - startTime;
+  }
+
+  double avg = 1000 * total / (inputSize / framesToOutput);
+  printf("Avg Processing per period: %.4fms\n", avg);
+  printf("Rate: %.4fms\n", avg / framesToOutput);
+
+}
+
+
+
 int main() {
 
     // test1();
-    test2();
+    // test2();
     // test3();
     // test4();
+    test5();
 
     return 0;
 }

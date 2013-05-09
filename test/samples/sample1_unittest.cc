@@ -135,7 +135,6 @@ TEST_F(ConvolutionTest, Simple1) {
     }
 }
 
-/*
 TEST_F(ConvolutionTest, Simple2) {
     double h[] = {0,2,2,2};
     int hSize  = 4;
@@ -162,6 +161,7 @@ TEST_F(ConvolutionTest, Simple2) {
     }
 }
 
+/*
 TEST_F(ConvolutionTest, Simple3) {
 
     double h[] = { 4, 10, 6, 0, 2, 8, 6, 1, 1, 5, 0, 5, 0, 2, 7, 3};
@@ -269,7 +269,7 @@ TEST_F(ConvolutionTest, Random1024) {
 
   int hSize = 1024;
   double *h = new double[hSize];
-  for (int i = 0; i < 128; i++)
+  for (int i = 0; i < hSize; i++)
     h[i] = rand_float(0, 1);
 
   int inputSize = hSize * 10;

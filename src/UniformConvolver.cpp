@@ -14,24 +14,25 @@ UniformConvolver::UniformConvolver(double* impulseResponse, int impulseSize , in
   assert(m_impulseSize % m_outputSize == 0);
 
   for (int i = 0; i < n; i++) {
-    m_fftFrames.push_back( FFTFrame(impulseResponse, outputSize, &m_accumulationBuffer, i*m_outputSize));
+    m_fftFrames.push_back( new FFTFrame(impulseResponse, outputSize, &m_accumulationBuffer, i*m_outputSize));
+  }
+}
+
+UniformConvolver::~UniformConvolver() {
+  while(!m_fftFrames.empty()) {
+    delete m_fftFrames.back();
+    m_fftFrames.pop_back();
   }
 }
 
 void UniformConvolver::process(double *input, double *output) {
 
-  omp_set_num_threads(1);
-
+  omp_set_num_threads(12);
   #pragma omp parallel for
   for(int i = 0; i < m_fftFrames.size(); i++) {
-    m_fftFrames[i].process(input);
+    m_fftFrames[i]->process(input);
   }
 
-  /*
-  for(std::vector<int>::size_type i = 0; i != m_fftFrames.size(); i++) {
-    m_fftFrames[i].process(input);
-  }
-  */
   m_accumulationBuffer.loadOutput(output);
 }
 

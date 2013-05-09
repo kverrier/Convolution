@@ -1,7 +1,7 @@
 CC=g++
 CFLAGS=-c -Wall -Wextra
-LDFLAGS=-lm -lfftw3 -lstdc++
-SRCS= src/main.cpp \
+LDFLAGS=-lm -lfftw3 -lstdc++ -fopenmp -lpthread
+SRCS= bench/main.cpp \
 			src/FFTFrame.cpp \
 			src/conv.cpp \
 			src/ReverbAccumulationBuffer.cpp \
@@ -14,7 +14,7 @@ TARGET=convolution
 all: $(SRCS) $(TARGET)
 
 run: $(TARGET)
-	./$(TARGET)
+	OMP_NUM_THREADS=2 ./$(TARGET)
 
 $(TARGET): $(OBJS)
 	$(CC) -o $@ $^ $(LDFLAGS)

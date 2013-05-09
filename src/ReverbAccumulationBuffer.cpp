@@ -9,6 +9,10 @@ ReverbAccumulationBuffer::ReverbAccumulationBuffer(int size, int outputFrames) {
   m_index = 0;
 }
 
+ReverbAccumulationBuffer::~ReverbAccumulationBuffer() {
+  delete[] m_dataBuffer;
+}
+
 void ReverbAccumulationBuffer::loadOutput(double* audioOut) {
   memcpy(audioOut, m_dataBuffer + m_index, sizeof(double) * m_outputFrames);
   memset(m_dataBuffer + m_index, 0, sizeof(double) * m_outputFrames);
