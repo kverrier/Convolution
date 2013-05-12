@@ -7,7 +7,7 @@
 
 class UniformConvolver {
   public:
-    UniformConvolver(double* impulseResponse, int impulseSize, int outputSize);
+    UniformConvolver(double* impulseResponse, int impulseSize, int outputSize, int nThreads);
     ~UniformConvolver();
     void process(double* input, double* output);
     void print();
@@ -19,5 +19,7 @@ class UniformConvolver {
     // std::vector<FFTFrame> m_fftFrames;
     std::vector<FFTFrame*> m_fftFrames;
     ReverbAccumulationBuffer m_accumulationBuffer;
+    int m_nThreads;
+
 };
 #endif

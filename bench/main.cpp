@@ -1,5 +1,6 @@
 /* Copyright (c) 2013 Kyle Verrier */
 
+#include <getopt.h>
 #include <iostream>
 #include <fstream>
 #include <stdlib.h>
@@ -10,135 +11,100 @@
 #include "../src/UniformConvolver.h"
 #include "CycleTimer.h"
 
-bool doublesEqual(double a, double b) {
-    return fabs(a - b) < .00000000001;
+// Impulse size
+int hSize = 0;
+
+// Output buffer size
+int framesToOutput = 0;
+
+// Number of times to run the simulation
+int nRuns = 0;
+
+// Number of threads to use
+int nThreads = 0;
+
+
+void usage(char *program) {
+  printf("Usage: %s [options]\n"
+         "  Solves the Wandering Salesman Problem for the distances provided \n"
+         "  on stdin.\n"
+         "\n"
+         "Program Options:\n"
+         "  -i <file>          Use <file> instead of standard in\n"
+         "  -?  --help         This message\n", program);
 }
 
-void printTestOutput(double* expected, std::vector<double> actual) {
-    if ( std::equal(actual.begin(), actual.end(), expected, doublesEqual) ) {
-        std::cout << "PASSED\n";
-    } else {
-        std::cout << "!!! FAIL !!!. Expected:\t[";
-        for( int i = 0; i < actual.size(); i++ )
-            std::cout << std::fixed << expected[i] << ", ";
-        std::cout << "]\n\t\tActual:\t[";
-        for( size_t i = 0; i < actual.size(); i++ )
-            std::cout << std::fixed << actual[i] << ", ";
-        std::cout << "]\n";
+
+void parse_args(int argc, char **argv) {
+  int opt;
+
+  static struct option long_opts[] = {
+    {"input", 1, 0, 'i'},
+    {"help", 0, 0, '?'},
+    {0, 0, 0, 0}
+  };
+
+  while ((opt = getopt_long(argc, argv, "o:n:r:t:?h", long_opts, NULL)) != EOF) {
+    switch (opt) {
+    case 'o':
+      framesToOutput = atoi(optarg);
+      break;
+    case 'n':
+      nRuns = atoi(optarg);
+      break;
+    case 'r':
+      hSize = atoi(optarg);
+      break;
+    case 't':
+      nThreads = atoi(optarg);
+      break;
+    case 'h':                  /* Explicit fall through */
+    case '?':
+      if (optopt == 'r' || optopt == 't')
+        fprintf (stderr, "Option -%c requires an argument.\n", optopt);
+      else {
+        usage(argv[0]);
+      }
+      exit(EXIT_SUCCESS);
+    default:
+      usage(argv[0]);
+      exit(EXIT_FAILURE);
     }
-
+  }
 }
 
-void test3() {
-    double h[] = {0,2,2,2,1,3,0,2};
-    int hSize = 8;
-    int framesToOutput = 8;
-    double *output = new double[framesToOutput];
-
-    double inputStream[] = {1,2,1,1, 0,1,1,1, 0,0,0,0, 0,0,0,0 };
-    int inputLength = 16;
-
-    UniformConvolver uc(h, hSize, framesToOutput);
-
-    std::vector<double> outputStream;
-    for (int i = 0; i < inputLength / framesToOutput; i++) {
-        uc.process(inputStream+(i*framesToOutput), output);
-        for (int i = 0; i < framesToOutput; i++)
-            outputStream.push_back(output[i]);
-    }
-
-    double expected[] = {0, 2, 6, 8, 9, 9, 11, 10, 13, 7, 8, 4, 5, 2, 2, 0};
-    printTestOutput(expected, outputStream);
-}
-
-void test4() {
-    double h[] = { 4, 10, 6, 0, 2, 8, 6, 1, 1, 5, 0, 5, 0, 2, 7, 3};
-    int hSize = 16;
-    double inputStream[] = { 10, 0, 10, 7, 8, 0, 3, 6, 2, 0, 10, 5, 6, 6, 6, 5,
-                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-    int inputLength = 32;
-
-    int framesToOutput = 16;
-    double *output = new double[framesToOutput];
-
-    UniformConvolver uc(h, hSize, framesToOutput);
-
-    std::vector<double> outputStream;
-    for (int i = 0; i < inputLength / framesToOutput; i++) {
-        uc.process(inputStream+(i*framesToOutput), output);
-        for (int i = 0; i < framesToOutput; i++) { 
-            outputStream.push_back(output[i]);
-        }
-    }
-
-    double expected[] = { 40, 100, 100, 128, 182, 202, 140, 158,
-                          228, 222, 123, 271, 247, 279, 266, 319,
-                          314, 250, 218, 195, 146, 177,  98,  91,
-                          135, 107,  94,  72,  70,  53,  15 };
-    /*
-    double expected[] = { 40, 100, 100, 128, 182, 202, 140, 158,
-               228, 222, 123, 271, 247, 279, 266, 319,
-               422, 336, 420, 349, 375, 396, 353, 402,
-               498, 514, 580, 469, 637, 565, 549, 596,
-               547, 560, 443, 445, 459, 347, 457, 341,
-               393, 375, 304, 323, 265, 255, 175, 194,
-               226, 156, 153, 153, 156, 144,  88, 142,
-                95,  60,  40,  37,  30,  12,   9 };
-                */
-
-    printTestOutput(expected, outputStream);
-}
-
-
-void test2() {
-    double h[] = {0,2,2,2};
-    int hSize  = 4;
-    int framesToOutput = 2;
-    double output[2] = {0};
-    int framesToProcess = 2;
-
-    UniformConvolver uniConv(h, hSize, framesToOutput);
-
-    double inputStream[] = {1,2,1,1, 0,0,0,0, 0,0,0,0, 0,0,0,0 };
-    int inputLength = 4;
-
-    std::vector<double> outputStream;
-    for (int i = 0; i < inputLength / framesToProcess; i++) {
-        uniConv.print();
-        uniConv.process(inputStream+(i*framesToProcess), output);
-
-        for (int i = 0; i < framesToOutput; i++) {
-            outputStream.push_back(output[i]);
-        }
-    }
-
-    double expected[] = {0, 2, 6, 8, 8, 4, 2, 0};
-    printTestOutput(expected, outputStream);
-
-}
 
 double rand_float( double low, double high ) {
   return ( ( double )rand() * ( high - low ) ) / ( double )RAND_MAX + low;
 }
 
-void test5() {
+int main(int argc, char** argv) {
+  parse_args(argc, argv);
+  /*
+  printf("Running simulation for IR size(%d), outputbuffer size (%d): %d times using %d threads...\n", 
+      hSize, framesToOutput, nRuns, nThreads );
+  */
+
   srand(1234);
 
-  int hSize = 4096;
+  // Create Random impulse response
   double *h = new double[hSize];
   for (int i = 0; i < hSize; i++)
     h[i] = rand_float(0, 1);
 
-  int inputSize = hSize * 100;
+  // Create input stream
+  int inputSize = framesToOutput * nRuns;
   double *input = new double[inputSize];
   for (int i = 0; i < inputSize / 2; i++)
     input[i] = rand_float(0, 1);
 
-  int framesToOutput = 32;
+  // Allocate output buffer
   double *output = new double[framesToOutput];
 
-  UniformConvolver uc(h, hSize, framesToOutput);
+  // Create convolver
+  UniformConvolver uc(h, hSize, framesToOutput, nThreads);
 
+  // Run simulation for all of the input and measure computation time
   double total = 0.0;
   for (int i = 0; i < inputSize / framesToOutput; i++) {
     double startTime = CycleTimer::currentSeconds();
@@ -148,20 +114,11 @@ void test5() {
   }
 
   double avg = 1000 * total / (inputSize / framesToOutput);
+  /*
   printf("Avg Processing per period: %.4fms\n", avg);
   printf("Rate: %.4fms\n", avg / framesToOutput);
+  */
+  printf("%.4f", avg / framesToOutput);
 
-}
-
-
-
-int main() {
-
-    // test1();
-    // test2();
-    // test3();
-    // test4();
-    test5();
-
-    return 0;
+  return 0;
 }

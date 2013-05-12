@@ -52,7 +52,6 @@ int FFTFrame::getReadIndex() {
 
 void FFTFrame::process(double* input) {
   // printf("THREAD %d\n", omp_get_thread_num() );
-  printf("THREAD %d\n", omp_get_num_threads() );
   int offset = m_framesToProcess;
   int overlapAmount = m_size / 2;
 

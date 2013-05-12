@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=-c -Wall -Wextra
+CFLAGS=-c -Wall -Wextra -fopenmp -O2
 LDFLAGS=-lm -lfftw3 -lstdc++ -fopenmp -lpthread
 SRCS= bench/main.cpp \
 			src/FFTFrame.cpp \
