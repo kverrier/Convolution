@@ -5,10 +5,10 @@ SAMPLE_RATE=44100
 
 echo -e "IR_LEN\t1\t2\t3\t4\t5\t6"
 
-for OUT_SIZE in 64 256 512
+for OUT_SIZE in 512
 do
 
-  for IMP_SIZE in 32768 65536
+  for IMP_SIZE in 32768 65536 131072 262144
   do
     LATENCY=`echo "$OUT_SIZE / $SAMPLE_RATE * 1000" | bc -l`
 

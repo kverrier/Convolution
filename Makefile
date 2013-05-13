@@ -1,5 +1,7 @@
-CC=g++
-CFLAGS=-c -Wall -Wextra -fopenmp -O2
+CC=g++ -m64
+ISPC=ispc
+ISPCFLAGS=-O2 --target=sse4-x2 --arch=x86-64
+CFLAGS=-c -Wall -Wextra -fopenmp -O3 -msse3
 LDFLAGS=-lm -lfftw3 -lstdc++ -fopenmp -lpthread
 SRCS= bench/main.cpp \
 			src/FFTFrame.cpp \
